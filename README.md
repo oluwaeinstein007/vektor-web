@@ -1,29 +1,27 @@
-# vektor-platform
+# vektor-web
 
-All TypeScript apps and microservices for [VEKTOR](../vektor-docs/VEKTOR-PRD.md) — see PRD §9.2 and §9.6 for the full repository layout this maps to.
+The VEKTOR frontend — see [VEKTOR-PRD.md](../vektor-docs/VEKTOR-PRD.md) §9.2 and §9.6. Split out of `vektor-platform` (now [`vektor-backend`](../vektor-backend)) so the frontend and backend ship as independent repos/deployments.
 
 ## Layout
 
 ```
-apps/            Next.js web dashboard, field PWA, API gateway plugins   (Phase 1+, not yet scaffolded)
-services/        ingest-svc, cv-inference-svc, fusion-svc, coa-svc, ...  (Phase 1+, not yet scaffolded)
+apps/
+  web/           Operator dashboard — Next.js 15 App Router + MapLibre GL (FE-001/002/003, §10.1)
 packages/
-  config/        Shared TypeScript, ESLint, and Prettier config
-  shared/        Re-exports @vektor/proto — no service imports the contract repo directly
-  db/            Drizzle ORM schema (PostgreSQL + PostGIS + TimescaleDB)
-  kafka/         kafkajs client factory + topic-naming helper + re-exported event schemas
-  ui/            Shared React components (shadcn/ui base)
+  ui/            Shared React components (shadcn/ui base) for apps/web and the future apps/field-pwa
+  config/        Shared TypeScript base config (tsconfig.base.json)
 ```
 
-`apps/` and `services/` are intentionally empty right now — this repo currently covers Phase 0 (INFRA-002: Turborepo + pnpm workspace init, shared package scaffolding). Each service/app is scaffolded by its own roadmap task (see `../vektor-docs/docs/09-roadmap.md`) as its Phase comes up.
+`apps/field-pwa` doesn't exist yet — no FE-xxx roadmap task has created it — but when it lands it belongs in this repo alongside `apps/web`, not in `vektor-backend`.
 
 ## Local development
 
-`@vektor/proto` is consumed from the filesystem until it's published to a real registry — build it first:
+`apps/web` depends on `@vektor/shared`, which lives in the sibling `vektor-backend` repo (`packages/shared`) and is consumed via a filesystem `link:`, the same cross-repo pattern `vektor-backend` itself uses for `vektor-proto`. Build the dependency chain in order:
 
 ```bash
 cd ../vektor-proto && pnpm build
-cd ../vektor-platform && pnpm install
+cd ../vektor-backend/packages/shared && pnpm install && pnpm build
+cd ../../../vektor-web && pnpm install
 pnpm build
 ```
 

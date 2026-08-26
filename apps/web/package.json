@@ -13,7 +13,7 @@
     "clean": "rm -rf .next"
   },
   "dependencies": {
-    "@vektor/shared": "workspace:*",
+    "@vektor/shared": "link:../../../vektor-backend/packages/shared",
     "@vektor/ui": "workspace:*",
     "idb": "^8.0.3",
     "maplibre-gl": "^5.0.1",
