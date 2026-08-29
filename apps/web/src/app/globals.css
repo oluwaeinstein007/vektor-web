@@ -32,8 +32,79 @@
   --color-ring: var(--ring);
 }
 
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  margin: 0;
+  /* Mobile Safari/Chrome pull-to-refresh and rubber-banding fight the
+     MapLibre canvas's own drag/pinch gestures — this is a full-bleed map
+     app, not a scrolling document, on every viewport size. */
+  overscroll-behavior: none;
+  overflow: hidden;
+}
+
+/*
+ * Shared layout for every floating HUD element (map layer panel, sensor
+ * health panel, topbar) — fixed rather than absolute so panels stay put
+ * regardless of which scroll container they're rendered under, and
+ * anchored with env(safe-area-inset-*) so a notch/home-indicator on a
+ * phone never clips them. `max-width` keeps a panel from overflowing a
+ * narrow viewport instead of forcing horizontal scroll on the whole page.
+ */
+.hud-anchor {
+  position: fixed;
+  z-index: 20;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+}
+
+:root {
+  --topbar-height: 37px;
+}
+
+.hud-anchor-top-right {
+  top: calc(env(safe-area-inset-top, 0px) + var(--topbar-height) + 12px);
+  right: calc(env(safe-area-inset-right, 0px) + 12px);
+}
+
+.hud-anchor-bottom-left {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  left: calc(env(safe-area-inset-left, 0px) + 12px);
+}
+
+.hud-topbar {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+}
+
+.app-topbar-subtitle {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .app-topbar-subtitle {
+    display: inline;
+  }
+}
+
+/* Below ~640px (most phones in portrait), stop pinning panels to a fixed
+   pixel-width column and let them span the available width instead — two
+   168px/300px-minwidth panels side by side would otherwise overflow a
+   360px-wide screen. */
+@media (max-width: 640px) {
+  .hud-anchor-top-right,
+  .hud-anchor-bottom-left {
+    left: 12px;
+    right: 12px;
+    max-width: none;
+    width: auto;
+  }
 }

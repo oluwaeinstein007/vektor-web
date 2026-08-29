@@ -26,3 +26,31 @@ export const HUD_PANEL_TITLE_STYLE: CSSProperties = {
   paddingBottom: 6,
   marginBottom: 8,
 };
+
+// Title row variant for a panel that can collapse (LayerPanel,
+// SensorHealthPanel on narrow viewports) — same look as HUD_PANEL_TITLE_STYLE
+// but laid out to hold a toggle affordance on the right without a second
+// set of one-off styles per panel.
+export const HUD_PANEL_TITLE_ROW_STYLE: CSSProperties = {
+  ...HUD_PANEL_TITLE_STYLE,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 8,
+  cursor: "pointer",
+  userSelect: "none",
+};
+
+// A tap target for the collapse chevron / any icon-only HUD control —
+// sized to meet the ~44px touch-target guideline via padding rather than
+// growing the visible glyph, so it stays legible at desktop sizes too.
+export const HUD_ICON_BUTTON_STYLE: CSSProperties = {
+  background: "transparent",
+  border: "none",
+  color: "inherit",
+  cursor: "pointer",
+  padding: 8,
+  margin: -8,
+  lineHeight: 1,
+  fontSize: 12,
+};

@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { toFeatureCollection } from "../src/lib/entity-geojson.ts";
+import { AFFILIATION_COLORS } from "../src/lib/entity-symbols.ts";
 import type { Entity } from "@vektor/shared";
 
 function makeEntity(overrides: Partial<Entity> = {}): Entity {
@@ -31,7 +32,7 @@ test("converts entities to a GeoJSON FeatureCollection with [lon, lat] point coo
   assert.deepEqual(feature.geometry.coordinates, [4.352, 51.9225]);
   assert.equal(feature.properties?.entity_id, entity.entity_id);
   assert.equal(feature.properties?.affiliation, "HOSTILE");
-  assert.equal(feature.properties?.color, "#ef4444");
+  assert.equal(feature.properties?.color, AFFILIATION_COLORS.HOSTILE);
 });
 
 test("maps each affiliation to a distinct color", () => {

@@ -10,7 +10,7 @@ const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
 export default function DashboardPage() {
   return (
     <SocketProvider url={SOCKET_URL}>
-      <main style={{ width: "100vw", height: "100vh" }}>
+      <main style={{ width: "100vw", height: "100dvh" }}>
         <BaseMap />
       </main>
     </SocketProvider>
