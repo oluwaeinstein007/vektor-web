@@ -1,0 +1,64 @@
+# INFRA-008: this repo had no CI at all before this.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  build-lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      # apps/web depends on @vektor/shared via
+      # `link:../../../vektor-backend/packages/shared`, which itself
+      # depends on @vektor/proto via `link:../../../vektor-proto` — three
+      # repos checked out as siblings at the exact relative depth those
+      # links expect, same pattern vektor-backend's own edge-arm64.yml uses.
+      - uses: actions/checkout@v4
+        with:
+          path: vektor-web
+      - uses: actions/checkout@v4
+        with:
+          repository: oluwaeinstein007/vektor-proto
+          path: vektor-proto
+      - uses: actions/checkout@v4
+        with:
+          repository: oluwaeinstein007/vektor-backend
+          path: vektor-backend
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Install protoc (vektor-proto's codegen:ts needs a real binary on PATH)
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends protobuf-compiler
+
+      - name: Build vektor-proto (dist/ and src/generated/ are both gitignored there)
+        working-directory: vektor-proto
+        run: pnpm install --frozen-lockfile && pnpm codegen:ts && pnpm build
+
+      # Only installs/builds @vektor/shared and its dependencies, not
+      # vektor-backend's full ~20-package workspace (onnxruntime-node,
+      # node-llama-cpp, etc.) — apps/web only needs this one package.
+      - name: Build vektor-backend's @vektor/shared
+        working-directory: vektor-backend
+        run: pnpm install --filter="@vektor/shared..." --frozen-lockfile && pnpm --filter=@vektor/shared build
+
+      - name: Install vektor-web
+        working-directory: vektor-web
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        working-directory: vektor-web
+        run: pnpm build
+
+      - name: Lint
+        working-directory: vektor-web
+        run: pnpm lint
+
+      - name: Test
+        working-directory: vektor-web
+        run: pnpm test
