@@ -1,0 +1,29 @@
+{
+  "name": "@vektor/field-pwa",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Field operator PWA: browser-based GPS + gyro/orientation capture from an operator's own phone, posted to ingest-svc's field HTTP endpoint. Not in the original roadmap phases — see VEKTOR-PRD.md's field-pwa placeholder in vektor-edge/vektor-infra, built out for real here.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "dev": "vite",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@vektor/ui": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "vite-plugin-mkcert": "^1.17.6",
+    "vite-plugin-pwa": "^0.21.1"
+  }
+}

@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/* Tailwind v4's automatic source detection is rooted at this app and
+   doesn't reach a sibling workspace package's source — same gotcha found
+   building apps/web's Target Workbench (see apps/web/src/app/globals.css's
+   header comment). Without this, @vektor/ui's Button/Card/Badge/Panel
+   render with zero utility styling. */
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
+
+/* Same dark tokens as apps/web/src/app/globals.css — this app has no light
+   mode either, and should read as the same visual system as the dashboard
+   even though it's a separate Vite build. Keep these two blocks in sync. */
+:root {
+  --background: #0a0e16;
+  --foreground: #e5e7eb;
+  --primary: #7dd3fc;
+  --primary-foreground: #0a0e16;
+  --destructive: #ff4d4d;
+  --destructive-foreground: #0a0e16;
+  --accent: #1e293b;
+  --accent-foreground: #e5e7eb;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #7dd3fc;
+
+  --hud-bg: rgba(11, 18, 32, 0.92);
+  --hud-border: #1e293b;
+  --hud-fg: #e5e7eb;
+  --hud-accent: #7dd3fc;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: ui-monospace, "Courier New", monospace;
+  overscroll-behavior: none;
+  /* iOS/Android home-indicator and notch safe areas — this app runs
+     full-screen once installed (display: "standalone" in the manifest). */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  box-sizing: border-box;
+}
