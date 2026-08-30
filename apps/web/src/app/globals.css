@@ -1,21 +1,38 @@
 @import "tailwindcss";
 
+/* Tailwind v4's automatic source detection is rooted at this app and
+   doesn't reach a sibling workspace package's source — without this,
+   @vektor/ui's cva() class strings (bg-primary, rounded-md, etc.) are never
+   scanned, so every component built from it (Button, Card, Badge, Panel)
+   renders with zero utility styling despite the classes being present in
+   the DOM. Found when Card/Badge/Button were used for the first time
+   anywhere in this app (Target Workbench, Settings) — nothing before this
+   actually imported @vektor/ui's components. */
+@source "../../../../packages/ui/src/**/*.{ts,tsx}";
+
 /* shadcn/ui-style tokens — @vektor/ui's components (packages/ui) are
    written against these exact CSS variable names (bg-primary,
    text-primary-foreground, etc.), so this app is the one place that has
-   to define them. Any other app consuming @vektor/ui needs the same block. */
+   to define them. Calibrated dark (this app has no light mode anywhere —
+   the map, every HUD panel, and now every full-page route are all dark),
+   reusing the same literal colors as hud-style.ts/app-topbar.tsx so a
+   @vektor/ui component and a hand-styled HUD panel read as one palette
+   rather than two. These tokens sat unused (oklch light-mode placeholders)
+   until Target Workbench/Settings became the first real consumers of
+   Button/Card/Badge — calibrating them now, not overriding shipped output.
+   Any other app consuming @vektor/ui needs the same block. */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --background: #0a0e16;
+  --foreground: #e5e7eb;
+  --primary: #7dd3fc;
+  --primary-foreground: #0a0e16;
+  --destructive: #ff4d4d;
+  --destructive-foreground: #0a0e16;
+  --accent: #1e293b;
+  --accent-foreground: #e5e7eb;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #7dd3fc;
 }
 
 @theme inline {
@@ -106,5 +123,39 @@ body {
     right: 12px;
     max-width: none;
     width: auto;
+  }
+}
+
+/* Additive HUD-toned custom properties for non-map-overlay surfaces (Target
+   Workbench, field-pwa) that want to match the map HUD panels' tactical
+   register via @vektor/ui's `tone="hud"` variant, without importing or
+   touching hud-style.ts (which stays map-overlay-specific). Values copied
+   1:1 from hud-style.ts's literals — intentionally a second source of truth
+   for now rather than a refactor of already-shipped overlay styling. */
+:root {
+  --hud-bg: rgba(11, 18, 32, 0.92);
+  --hud-border: #1e293b;
+  --hud-fg: #e5e7eb;
+  --hud-accent: #7dd3fc;
+}
+
+/* Full-page (non-map-overlay) routes, like Target Workbench and Settings,
+   scroll normally rather than the full-bleed fixed-map layout page.tsx uses. */
+.vektor-page {
+  min-height: 100dvh;
+  overflow-y: auto;
+  background: #0a0e16;
+}
+
+.vektor-page-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .vektor-page-grid {
+    grid-template-columns: 1.4fr 1fr;
+    align-items: start;
   }
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSocketStatus, type SocketStatus } from "@/hooks/useSocketStatus";
 
 const STATUS_LABEL: Record<SocketStatus, string> = {
@@ -59,6 +60,17 @@ export function AppTopbar() {
           OPERATOR DASHBOARD
         </span>
       </div>
+      <nav aria-label="Primary" style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 11 }}>
+        <Link href="/" style={{ color: "inherit", textDecoration: "none", opacity: 0.85 }}>
+          Map
+        </Link>
+        <Link href="/target-workbench" style={{ color: "inherit", textDecoration: "none", opacity: 0.85 }}>
+          Target Workbench
+        </Link>
+        <Link href="/settings" style={{ color: "inherit", textDecoration: "none", opacity: 0.85 }}>
+          Settings
+        </Link>
+      </nav>
       <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
         <span
           aria-hidden
