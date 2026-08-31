@@ -36,6 +36,18 @@ pnpm dev
 
 Geolocation/DeviceOrientation/DeviceMotion all require a secure context — a phone hitting this dev server's LAN IP over plain `http://` gets no permission prompt at all, camera/gyro/GPS just silently do nothing. `vite-plugin-mkcert` gives real local HTTPS automatically; the **first run** on this machine needs an interactive terminal (`mkcert -install` asks for `sudo`) to add its CA to the system trust store — that's a one-time step. In a headless/CI/sandboxed environment with no interactive sudo, set `VEKTOR_FIELD_HTTPS=0` to skip HTTPS entirely (only useful for automated checks against `localhost` with a browser flag like `--unsafely-treat-insecure-origin-as-secure`, not for a real phone).
 
+**If `mkcert -install` fails because no interactive sudo is available** (found running this in a sandboxed dev environment): `vite-plugin-mkcert` re-runs its full install command unconditionally on every `pnpm dev`, so it can't just be pointed at an existing cert to skip the failing step. Work around it by generating a cert directly with the plugin's own `mkcert` binary, skipping `-install` (no system trust store write, so no sudo needed):
+
+```bash
+CAROOT=~/.vite-plugin-mkcert ~/.vite-plugin-mkcert/mkcert \
+  -key-file ~/.vite-plugin-mkcert/dev.pem -cert-file ~/.vite-plugin-mkcert/cert.pem \
+  localhost 127.0.0.1 <this-machine's-LAN-IP>
+
+VITE_HTTPS_CERT=~/.vite-plugin-mkcert/cert.pem VITE_HTTPS_KEY=~/.vite-plugin-mkcert/dev.pem pnpm dev
+```
+
+`vite.config.ts` picks up `VITE_HTTPS_CERT`/`VITE_HTTPS_KEY` and uses Vite's own `server.https` directly, skipping the mkcert plugin entirely when set. The resulting cert isn't in any trust store, so a phone visiting it will see a "connection is not private" warning — this is fine to click through (Chrome: Advanced → Proceed) since the page still loads as a real `https://` origin from JavaScript's point of view, which is what Geolocation/DeviceOrientation actually check for.
+
 **To actually use it from a phone**: the phone's browser needs to trust this machine's mkcert CA too — `vite-plugin-mkcert` supports a `mkcertHost`-served CA download link (see its README), or copy `~/.vite-plugin-mkcert/rootCA.pem` from wherever mkcert stored it onto the phone and install it as a trusted certificate (Android: Settings → Security → Encryption & credentials → Install a certificate → CA certificate). Then open `https://<this-machine's-LAN-IP>:5173` on the phone, on the same network.
 
 ## Using the app

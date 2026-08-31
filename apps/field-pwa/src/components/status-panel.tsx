@@ -67,10 +67,14 @@ export function StatusPanel(props: StatusPanelProps) {
             </label>
             <input
               id="device-key"
-              type="password"
+              type="text"
+              autoComplete="off"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
               value={props.deviceKey}
               disabled={props.transmitting}
-              onChange={(e) => props.onDeviceKeyChange(e.target.value)}
+              onChange={(e) => props.onDeviceKeyChange(e.target.value.trim())}
               style={{ width: "100%", fontFamily: "inherit", fontSize: 12, boxSizing: "border-box" }}
             />
           </div>

@@ -1,3 +1,4 @@
+import { readFileSync, existsSync } from "node:fs";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -16,17 +17,28 @@ import { VitePWA } from "vite-plugin-pwa";
 const INGEST_SVC_URL = process.env.VITE_INGEST_SVC_URL ?? "http://localhost:3011";
 
 // mkcert's -install step needs interactive sudo to add its CA to the OS
-// trust store — fine on an operator's own machine (see the README's
-// walkthrough), but unavailable in a headless/CI/sandboxed environment.
-// VEKTOR_FIELD_HTTPS=0 skips it for exactly that case; every real run
-// (including the phone walkthrough) wants it on, so that's the default.
+// trust store — vite-plugin-mkcert re-runs that full command unconditionally
+// on every start (it doesn't check for already-generated cert files first),
+// so it can't just be pointed at an existing cert to skip the sudo step.
+// VEKTOR_FIELD_HTTPS=0 disables HTTPS entirely (useful for a quick check
+// against `localhost` with a browser flag; useless for a real phone).
+//
+// Manual-cert path: if VITE_HTTPS_CERT/VITE_HTTPS_KEY point at a cert/key
+// pair already generated some other way (e.g. `mkcert -key-file ... -cert-
+// file ...` run once, without `-install`, in an environment with no
+// interactive sudo — see the README), Vite's own `server.https` uses those
+// directly and the mkcert plugin (which would otherwise fight for the same
+// role) is skipped.
 const enableHttps = process.env.VEKTOR_FIELD_HTTPS !== "0";
+const manualCertPath = process.env.VITE_HTTPS_CERT;
+const manualKeyPath = process.env.VITE_HTTPS_KEY;
+const hasManualCert = Boolean(manualCertPath && manualKeyPath && existsSync(manualCertPath) && existsSync(manualKeyPath));
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    ...(enableHttps ? [mkcert()] : []),
+    ...(enableHttps && !hasManualCert ? [mkcert()] : []),
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
@@ -42,6 +54,7 @@ export default defineConfig({
   ],
   server: {
     host: true,
+    https: hasManualCert ? { cert: readFileSync(manualCertPath!), key: readFileSync(manualKeyPath!) } : undefined,
     proxy: {
       "/api/v1/field": {
         target: INGEST_SVC_URL,
