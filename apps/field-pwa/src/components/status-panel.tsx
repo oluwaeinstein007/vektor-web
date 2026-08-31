@@ -1,6 +1,26 @@
+import type { RefObject } from "react";
 import { Card, CardHeader, CardTitle, CardContent, Badge, Button, Panel } from "@vektor/ui";
 import type { GeoReading, GeoStatus } from "../lib/geolocation";
 import type { OrientationReading, OrientationStatus } from "../lib/orientation";
+import type { CameraStatus } from "../lib/camera";
+
+const CAMERA_STATUS_LABEL: Record<CameraStatus, string> = {
+  idle: "OFF",
+  starting: "STARTING…",
+  streaming: "LIVE",
+  denied: "PERMISSION DENIED",
+  unsupported: "NOT SUPPORTED",
+  error: "ERROR",
+};
+
+const CAMERA_STATUS_VARIANT: Record<CameraStatus, "default" | "secondary" | "destructive" | "outline"> = {
+  idle: "outline",
+  starting: "outline",
+  streaming: "secondary",
+  denied: "destructive",
+  unsupported: "destructive",
+  error: "destructive",
+};
 
 const GEO_STATUS_LABEL: Record<GeoStatus, string> = {
   idle: "IDLE",
@@ -39,6 +59,12 @@ export interface StatusPanelProps {
   lastSentAt: string | null;
   sendError: string | null;
   sentCount: number;
+  cameraEnabled: boolean;
+  onCameraEnabledChange: (enabled: boolean) => void;
+  cameraStatus: CameraStatus;
+  videoRef: RefObject<HTMLVideoElement | null>;
+  snapshotSentCount: number;
+  snapshotError: string | null;
 }
 
 function fmt(n: number | null | undefined, digits = 5): string {
@@ -112,6 +138,42 @@ export function StatusPanel(props: StatusPanelProps) {
           Sent: {props.sentCount} {props.lastSentAt && <span style={{ opacity: 0.6 }}>· last at {new Date(props.lastSentAt).toLocaleTimeString()}</span>}
         </div>
         {props.sendError && <div style={{ color: "#ff4d4d" }}>{props.sendError}</div>}
+      </Panel>
+
+      <Panel tone="hud" style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 11 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <label htmlFor="camera-enabled" style={{ display: "flex", alignItems: "center", gap: 8, cursor: props.transmitting ? "default" : "pointer" }}>
+            <input
+              id="camera-enabled"
+              type="checkbox"
+              checked={props.cameraEnabled}
+              disabled={props.transmitting}
+              onChange={(e) => props.onCameraEnabledChange(e.target.checked)}
+            />
+            <strong>Camera (fallback, no RTSP app)</strong>
+          </label>
+          <Badge variant={CAMERA_STATUS_VARIANT[props.cameraStatus]}>{CAMERA_STATUS_LABEL[props.cameraStatus]}</Badge>
+        </div>
+        <p style={{ opacity: 0.6 }}>
+          Prefer IP Webcam for a continuous feed — this sends a snapshot every few seconds instead, for a quick check with
+          nothing extra installed.
+        </p>
+        {props.cameraEnabled && (
+          <>
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption -- a live local self-preview, not authored media */}
+            <video
+              ref={props.videoRef}
+              autoPlay
+              playsInline
+              muted
+              style={{ width: "100%", borderRadius: 3, border: "1px solid #1e293b", display: "block" }}
+            />
+            <div aria-live="polite">
+              Snapshots sent: {props.snapshotSentCount}
+              {props.snapshotError && <div style={{ color: "#ff4d4d" }}>{props.snapshotError}</div>}
+            </div>
+          </>
+        )}
       </Panel>
     </main>
   );
