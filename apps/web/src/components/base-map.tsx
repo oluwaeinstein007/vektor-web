@@ -7,6 +7,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { EntityLayer } from "./entity-layer";
 import { NoStrikeZoneLayer } from "./no-strike-zone-layer";
 import { SensorHealthPanel } from "./sensor-health-panel";
+import { CameraFeedPanel } from "./camera-feed-panel";
 import { AppTopbar } from "./app-topbar";
 import { HudPanel } from "./hud-panel";
 import { useEntityUpdates } from "@/hooks/useEntityUpdates";
@@ -109,6 +110,7 @@ export function BaseMap() {
       <AppTopbar />
       <LayerPanel layers={layers} onToggle={toggleLayer} />
       <SensorHealthPanel />
+      <CameraFeedPanel />
     </div>
   );
 }

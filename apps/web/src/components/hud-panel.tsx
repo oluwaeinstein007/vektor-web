@@ -18,7 +18,7 @@ export function HudPanel({
   minWidth,
   children,
 }: {
-  anchor: "top-right" | "bottom-left";
+  anchor: "top-right" | "bottom-left" | "bottom-right";
   title: string;
   minWidth: number;
   children: ReactNode;

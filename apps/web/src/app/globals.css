@@ -94,6 +94,11 @@ body {
   left: calc(env(safe-area-inset-left, 0px) + 12px);
 }
 
+.hud-anchor-bottom-right {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  right: calc(env(safe-area-inset-right, 0px) + 12px);
+}
+
 .hud-topbar {
   position: fixed;
   top: env(safe-area-inset-top, 0px);
@@ -123,6 +128,14 @@ body {
     right: 12px;
     max-width: none;
     width: auto;
+  }
+
+  /* Left deliberately out of the full-width stretch above: bottom-left
+     already spans the whole width at this size, so bottom-right stays
+     compact and is raised clear of it instead of overlapping at the same
+     bottom offset (56px ~= a collapsed HudPanel's own height). */
+  .hud-anchor-bottom-right {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
   }
 }
 
