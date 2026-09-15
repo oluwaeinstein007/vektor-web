@@ -1,4 +1,4 @@
-import type { RoleRequirement } from "./rbac";
+import type { RoleRequirement } from "./rbac.ts";
 
 export interface NavItem {
   href: string;

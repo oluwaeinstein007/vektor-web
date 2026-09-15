@@ -10,6 +10,7 @@
     "lint": "eslint . && tsc --noEmit",
     "start": "next start",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "generate:access-matrix": "node --experimental-strip-types scripts/generate-access-matrix.ts",
     "clean": "rm -rf .next"
   },
   "dependencies": {

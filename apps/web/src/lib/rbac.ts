@@ -1,4 +1,4 @@
-import type { Role } from "./roles";
+import type { Role } from "./roles.ts";
 
 // Mirrors vektor-backend/packages/auth/src/roles.ts's RoleRequirement model
 // exactly, including its "+" interpretation (Commander/SuperAdmin satisfy
