@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Alert } from "@vektor/shared";
 import { Badge, Button, Panel } from "@vektor/ui";
 import { fetchWithAuth, AuthExpiredError, ALERT_SVC_URL } from "@/lib/api-client";
@@ -14,18 +14,44 @@ const SEVERITY_VARIANT: Record<Alert["severity"], "outline" | "secondary" | "des
   CRITICAL: "destructive",
 };
 
+// alert-svc has no push channel of its own into this queue (unlike its
+// email/webhook/SMS dispatch, which fires independently of anyone having
+// this page open) — this polls in the background and, once the operator
+// opts in, raises a real browser Notification for any alert that's new
+// since the last poll, rather than requiring the tab to be watched.
+const POLL_MS = 10_000;
+
 export function AlertQueue({ role }: { role: Role | undefined }) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission | "unsupported">("default");
   const canAct = isRole(role) && satisfiesRequirement(role, "analyst+");
+  const knownIds = useRef<Set<string> | null>(null);
+
+  useEffect(() => {
+    setNotifPermission(typeof window !== "undefined" && "Notification" in window ? Notification.permission : "unsupported");
+  }, []);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await fetchWithAuth<Alert[]>(ALERT_SVC_URL, "/api/v1/alerts");
+
+      // First load just establishes the baseline — nothing "new" to notify
+      // about yet, or every existing OPEN alert would fire a notification
+      // the instant the page loads.
+      if (knownIds.current && notifPermission === "granted") {
+        for (const alert of data) {
+          if (alert.status === "OPEN" && !knownIds.current.has(alert.alert_id)) {
+            new Notification(`VEKTOR — ${alert.severity} alert`, { body: alert.message, tag: alert.alert_id });
+          }
+        }
+      }
+      knownIds.current = new Set(data.map((a) => a.alert_id));
+
       setAlerts(data);
     } catch (err) {
       setAlerts([]);
@@ -33,11 +59,19 @@ export function AlertQueue({ role }: { role: Role | undefined }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [notifPermission]);
 
   useEffect(() => {
     void refresh();
+    const id = setInterval(() => void refresh(), POLL_MS);
+    return () => clearInterval(id);
   }, [refresh]);
+
+  async function enableNotifications() {
+    if (!("Notification" in window)) return;
+    const result = await Notification.requestPermission();
+    setNotifPermission(result);
+  }
 
   async function act(alertId: string, action: "ACKNOWLEDGE" | "ESCALATE" | "DISMISS") {
     setBusyId(alertId);
@@ -58,9 +92,18 @@ export function AlertQueue({ role }: { role: Role | undefined }) {
     <Panel tone="hud">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
         <strong style={{ fontSize: 12 }}>Alert triage queue</strong>
-        <Button type="button" size="sm" variant="outline" disabled={loading} aria-busy={loading} onClick={() => void refresh()}>
-          {loading ? "Refreshing…" : "Refresh"}
-        </Button>
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          {notifPermission === "default" && (
+            <Button type="button" size="sm" variant="outline" onClick={() => void enableNotifications()}>
+              Enable notifications
+            </Button>
+          )}
+          {notifPermission === "granted" && <span style={{ fontSize: 10, opacity: 0.6 }}>notifications on</span>}
+          {notifPermission === "denied" && <span style={{ fontSize: 10, opacity: 0.6 }}>notifications blocked</span>}
+          <Button type="button" size="sm" variant="outline" disabled={loading} aria-busy={loading} onClick={() => void refresh()}>
+            {loading ? "Refreshing…" : "Refresh"}
+          </Button>
+        </div>
       </div>
 
       {error && (

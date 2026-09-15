@@ -6,7 +6,11 @@ import { Panel } from "@vektor/ui";
 import { useRankedEntities } from "@/hooks/useRankedEntities";
 import { RankedEntityList } from "@/components/target-workbench/ranked-entity-list";
 import { CoaPanel } from "@/components/target-workbench/coa-panel";
+import { CoaHistory } from "@/components/target-workbench/coa-history";
 import { RequireRole } from "@/components/require-role";
+import { useAuthClaims } from "@/hooks/useAuthClaims";
+import { satisfiesRequirement } from "@/lib/rbac";
+import { isRole } from "@/lib/roles";
 
 function isAuthError(message: string): boolean {
   const m = message.toLowerCase();
@@ -24,6 +28,9 @@ export default function TargetWorkbenchPage() {
 function TargetWorkbenchContent() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { entities, error, loading } = useRankedEntities(true);
+  const claims = useAuthClaims();
+  const role = isRole(claims?.role) ? claims.role : undefined;
+  const canSeeHistory = satisfiesRequirement(role, "commander");
 
   return (
     <main className="vektor-page" style={{ fontFamily: "ui-monospace, 'Courier New', monospace", color: "#e5e7eb" }}>
@@ -49,6 +56,12 @@ function TargetWorkbenchContent() {
 
           <CoaPanel targetEntityId={selectedId} />
         </div>
+
+        {canSeeHistory && (
+          <div style={{ marginTop: 16 }}>
+            <CoaHistory />
+          </div>
+        )}
       </div>
     </main>
   );
