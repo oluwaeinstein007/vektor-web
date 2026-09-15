@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from "@vektor/ui";
 import { setAuthToken, getAuthToken, clearAuthToken, decodeTokenClaims } from "@/lib/auth-token";
 import { ROLES, type Role } from "@/lib/roles";
@@ -48,11 +47,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="vektor-page" style={{ padding: 20, fontFamily: "ui-monospace, 'Courier New', monospace", color: "#e5e7eb" }}>
+    <main className="vektor-page" style={{ fontFamily: "ui-monospace, 'Courier New', monospace", color: "#e5e7eb" }}>
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
-        <p style={{ fontSize: 11, opacity: 0.7, marginBottom: 12 }}>
-          <Link href="/">← Map</Link> · <Link href="/target-workbench">Target Workbench</Link>
-        </p>
         <h1 style={{ fontSize: 16, marginBottom: 12, color: "#7dd3fc", letterSpacing: "0.06em" }}>Settings</h1>
 
         <Card tone="hud">

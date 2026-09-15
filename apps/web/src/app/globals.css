@@ -158,6 +158,10 @@ body {
   min-height: 100dvh;
   overflow-y: auto;
   background: #0a0e16;
+  /* AppTopbar (.hud-topbar) is fixed/overlaid, now rendered once from the
+     root layout on every route — reserve the same clearance every non-map
+     page needs so content doesn't start underneath it. */
+  padding: calc(env(safe-area-inset-top, 0px) + var(--topbar-height) + 20px) 20px 20px;
 }
 
 .vektor-page-grid {

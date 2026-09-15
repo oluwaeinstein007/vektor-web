@@ -1,4 +1,5 @@
 import { BaseMap } from "@/components/base-map";
+import { RequireRole } from "@/components/require-role";
 import { SocketProvider } from "@/lib/socket-provider";
 
 // fusion-svc (Phase 3) is the Socket.io gateway — point this at it
@@ -9,10 +10,12 @@ const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
 
 export default function DashboardPage() {
   return (
-    <SocketProvider url={SOCKET_URL}>
-      <main style={{ width: "100vw", height: "100dvh" }}>
-        <BaseMap />
-      </main>
-    </SocketProvider>
+    <RequireRole requirement="analyst+">
+      <SocketProvider url={SOCKET_URL}>
+        <main style={{ width: "100vw", height: "100dvh" }}>
+          <BaseMap />
+        </main>
+      </SocketProvider>
+    </RequireRole>
   );
 }

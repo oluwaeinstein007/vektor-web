@@ -5,3 +5,7 @@
 export const ROLES = ["Viewer", "Field Operator", "Analyst", "Logistics Officer", "Commander", "SuperAdmin"] as const;
 
 export type Role = (typeof ROLES)[number];
+
+export function isRole(value: string | undefined): value is Role {
+  return typeof value === "string" && (ROLES as readonly string[]).includes(value);
+}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { COA } from "@vektor/shared";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, Badge, Button, Panel } from "@vektor/ui";
-import { fetchWithAuth, AuthExpiredError } from "@/lib/api-client";
+import { fetchWithAuth, AuthExpiredError, COA_SVC_URL } from "@/lib/api-client";
 import { useAuthClaims } from "@/hooks/useAuthClaims";
 
 const STATUS_VARIANT: Record<COA["status"], "secondary" | "destructive" | "outline"> = {
@@ -24,7 +24,7 @@ export function CoaPanel({ targetEntityId }: { targetEntityId: string | null }) 
     setBusy(true);
     setError(null);
     try {
-      const result = await fetchWithAuth<COA>("/api/v1/coa/generate", {
+      const result = await fetchWithAuth<COA>(COA_SVC_URL, "/api/v1/coa/generate", {
         method: "POST",
         body: JSON.stringify({ target_entity_id: targetEntityId }),
       });
@@ -43,7 +43,7 @@ export function CoaPanel({ targetEntityId }: { targetEntityId: string | null }) 
     try {
       const body =
         action === "approve" ? { option_rank: optionRank, notes: null } : { reason: "Rejected from Target Workbench" };
-      const result = await fetchWithAuth<COA>(`/api/v1/coa/${coa.coa_id}/${action}`, {
+      const result = await fetchWithAuth<COA>(COA_SVC_URL, `/api/v1/coa/${coa.coa_id}/${action}`, {
         method: "POST",
         body: JSON.stringify(body),
       });

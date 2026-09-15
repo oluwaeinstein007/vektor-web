@@ -1,5 +1,11 @@
 const STORAGE_KEY = "vektor.devAuthToken";
 
+// Dispatched whenever the token changes so any always-mounted listener
+// (AppTopbar's nav now lives in the root layout, not remounted per route
+// like Settings/Target Workbench are) can pick up a role change without
+// requiring a full page navigation.
+export const AUTH_CHANGE_EVENT = "vektor-auth-changed";
+
 export interface DecodedTokenClaims {
   sub: string;
   role: string | undefined;
@@ -14,10 +20,12 @@ export function getAuthToken(): string | null {
 
 export function setAuthToken(token: string): void {
   window.localStorage.setItem(STORAGE_KEY, token);
+  window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
 }
 
 export function clearAuthToken(): void {
   window.localStorage.removeItem(STORAGE_KEY);
+  window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
 }
 
 /**
