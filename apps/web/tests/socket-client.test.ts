@@ -54,6 +54,8 @@ test("onValidated passes a schema-conforming payload through to the handler", as
     latency_ms: 42,
     drop_rate: 0.001,
     last_heartbeat: new Date().toISOString(),
+    position: null,
+    coverage_radius_m: null,
   });
 
   const deadline = Date.now() + 5_000;
@@ -102,6 +104,8 @@ test("unsubscribe stops delivering further events", async () => {
     latency_ms: 10,
     drop_rate: 0,
     last_heartbeat: new Date().toISOString(),
+    position: null,
+    coverage_radius_m: null,
   });
 
   await new Promise((resolve) => setTimeout(resolve, 1000));

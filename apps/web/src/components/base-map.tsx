@@ -6,9 +6,9 @@ import { Protocol } from "pmtiles";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { EntityLayer } from "./entity-layer";
 import { NoStrikeZoneLayer } from "./no-strike-zone-layer";
+import { SensorCoverageLayer } from "./sensor-coverage-layer";
 import { SensorHealthPanel } from "./sensor-health-panel";
 import { CameraFeedPanel } from "./camera-feed-panel";
-import { AppTopbar } from "./app-topbar";
 import { HudPanel } from "./hud-panel";
 import { useEntityUpdates } from "@/hooks/useEntityUpdates";
 import { buildBaseMapStyle, OPENFREEMAP_PLANET_URL } from "@/lib/base-map-style";
@@ -101,13 +101,14 @@ export function BaseMap() {
 
   const entityLayerVisible = layers.find((l) => l.id === "entities")?.visible ?? true;
   const noStrikeZonesVisible = layers.find((l) => l.id === "no-strike-zones")?.visible ?? false;
+  const sensorCoverageVisible = layers.find((l) => l.id === "sensors")?.visible ?? true;
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
       {readyMap && <EntityLayer map={readyMap} visible={entityLayerVisible} />}
       {readyMap && <NoStrikeZoneLayer map={readyMap} visible={noStrikeZonesVisible} />}
-      <AppTopbar />
+      {readyMap && <SensorCoverageLayer map={readyMap} visible={sensorCoverageVisible} />}
       <LayerPanel layers={layers} onToggle={toggleLayer} />
       <SensorHealthPanel />
       <CameraFeedPanel />
