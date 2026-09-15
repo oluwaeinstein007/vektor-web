@@ -6,6 +6,7 @@ import { Badge, Button, Panel } from "@vektor/ui";
 import { fetchWithAuth, AuthExpiredError, ALERT_SVC_URL } from "@/lib/api-client";
 import { satisfiesRequirement } from "@/lib/rbac";
 import { isRole, type Role } from "@/lib/roles";
+import { ZonePolygonDrawer } from "./zone-polygon-drawer";
 
 interface ZoneSummary {
   zone_id: string;
@@ -21,15 +22,11 @@ interface ZoneSummary {
 const TRIGGERS: GeofenceTrigger[] = ["ENTRY", "EXIT", "BOTH"];
 const SEVERITIES: AlertSeverity[] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 
-function parsePolygon(text: string): [number, number][] {
-  return text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [lat, lon] = line.split(",").map((v) => Number(v.trim()));
-      return [lat ?? 0, lon ?? 0] as [number, number];
-    });
+/** alert-svc's polygon column expects a closed [lon, lat] ring (first ===
+ * last) — the drawer only tracks the open ring while the operator is still
+ * placing vertices, so the close happens once, here, at submit time. */
+function closeRing(openRing: [number, number][]): [number, number][] {
+  return [...openRing, openRing[0]!];
 }
 
 export function GeofenceZonesPanel({ role }: { role: Role | undefined }) {
@@ -42,7 +39,7 @@ export function GeofenceZonesPanel({ role }: { role: Role | undefined }) {
   const [name, setName] = useState("");
   const [trigger, setTrigger] = useState<GeofenceTrigger>("ENTRY");
   const [severity, setSeverity] = useState<AlertSeverity>("MEDIUM");
-  const [polygonText, setPolygonText] = useState("0,0\n0,0.01\n0.01,0.01\n0.01,0");
+  const [vertices, setVertices] = useState<[number, number][]>([]);
   const [creating, setCreating] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -76,10 +73,11 @@ export function GeofenceZonesPanel({ role }: { role: Role | undefined }) {
           affiliation_filter: null,
           channels: ["IN_APP"] satisfies AlertChannel[],
           notify: { emails: [], phones: [], webhook_urls: [] },
-          polygon: parsePolygon(polygonText),
+          polygon: closeRing(vertices),
         }),
       });
       setName("");
+      setVertices([]);
       setShowForm(false);
       await refresh();
     } catch (err) {
@@ -103,7 +101,15 @@ export function GeofenceZonesPanel({ role }: { role: Role | undefined }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
         <strong style={{ fontSize: 12 }}>Geofence zones</strong>
         {canManage && (
-          <Button type="button" size="sm" variant="outline" onClick={() => setShowForm((v) => !v)}>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setShowForm((v) => !v);
+              setVertices([]);
+            }}
+          >
             {showForm ? "Cancel" : "New zone"}
           </Button>
         )}
@@ -143,11 +149,8 @@ export function GeofenceZonesPanel({ role }: { role: Role | undefined }) {
               </select>
             </label>
           </div>
-          <label>
-            Polygon vertices (lat,lon per line — at least 4)
-            <textarea value={polygonText} onChange={(e) => setPolygonText(e.target.value)} rows={4} style={{ display: "block", width: "100%", fontFamily: "inherit", fontSize: 11 }} />
-          </label>
-          <Button type="button" size="sm" disabled={!name.trim() || creating} aria-busy={creating} onClick={() => void createZone()}>
+          <ZonePolygonDrawer vertices={vertices} onChange={setVertices} />
+          <Button type="button" size="sm" disabled={!name.trim() || vertices.length < 3 || creating} aria-busy={creating} onClick={() => void createZone()}>
             {creating ? "Creating…" : "Create zone"}
           </Button>
         </div>
