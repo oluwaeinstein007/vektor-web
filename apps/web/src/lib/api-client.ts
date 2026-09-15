@@ -6,6 +6,7 @@ export const COA_SVC_URL = process.env.NEXT_PUBLIC_COA_SVC_URL ?? "http://localh
 export const LOGISTICS_SVC_URL = process.env.NEXT_PUBLIC_LOGISTICS_SVC_URL ?? "http://localhost:3014";
 export const AUDIT_SVC_URL = process.env.NEXT_PUBLIC_AUDIT_SVC_URL ?? "http://localhost:3009";
 export const CV_INFERENCE_SVC_URL = process.env.NEXT_PUBLIC_CV_INFERENCE_SVC_URL ?? "http://localhost:3006";
+export const ALERT_SVC_URL = process.env.NEXT_PUBLIC_ALERT_SVC_URL ?? "http://localhost:3013";
 
 export class AuthExpiredError extends Error {
   constructor() {

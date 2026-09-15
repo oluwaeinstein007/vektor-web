@@ -14,6 +14,7 @@ export interface NavItem {
 export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/", label: "Map", requirement: "analyst+" },
   { href: "/target-workbench", label: "Target Workbench", requirement: "analyst+" },
+  { href: "/alerts", label: "Alerts", requirement: "all" },
   { href: "/logistics", label: "Logistics", requirement: "logistics+" },
   { href: "/admin", label: "Admin", requirement: "superadmin" },
 ];
