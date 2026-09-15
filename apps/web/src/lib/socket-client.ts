@@ -1,11 +1,16 @@
 import { io, type Socket } from "socket.io-client";
 import type { ServerToClientEvents, ClientToServerEvents } from "./socket-types.ts";
 import { S2CSchemas } from "./socket-types.ts";
+import { getAuthToken } from "./auth-token.ts";
 
 export type VektorSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
+// fusion-svc's gateway now verifies a role-bearing token on connection
+// (analyst+, matching geospatial-svc's REST /api/v1/entities) — passed via
+// the handshake's `auth` field, socket.io-client's own documented pattern
+// for this, since there's no per-message header on a persistent WebSocket.
 export function createVektorSocket(url: string): VektorSocket {
-  return io(url, { transports: ["websocket"] });
+  return io(url, { transports: ["websocket"], auth: { token: getAuthToken() } });
 }
 
 /**

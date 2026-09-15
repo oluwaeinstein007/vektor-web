@@ -1,6 +1,7 @@
 import { RequireRole } from "@/components/require-role";
 import { AuditLogViewer } from "@/components/admin/audit-log-viewer";
 import { ModelUploadPanel } from "@/components/admin/model-upload-panel";
+import { SensorManagementPanel } from "@/components/admin/sensor-management-panel";
 
 export default function AdminPage() {
   return (
@@ -11,6 +12,7 @@ export default function AdminPage() {
           <div className="vektor-page-grid">
             <AuditLogViewer />
             <ModelUploadPanel />
+            <SensorManagementPanel />
           </div>
         </div>
       </main>
