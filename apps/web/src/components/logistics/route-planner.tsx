@@ -5,8 +5,15 @@ import type { LatLon, RouteResult } from "@vektor/shared";
 import { Button, Panel } from "@vektor/ui";
 import { fetchWithAuth, AuthExpiredError, LOGISTICS_SVC_URL } from "@/lib/api-client";
 
-const DEFAULT_START: LatLon = { lat: 0, lon: 0 };
-const DEFAULT_END: LatLon = { lat: 0.05, lon: 0.05 };
+// logistics-svc's dev road network is a synthetic grid seeded near (50,
+// 10), not (0, 0) — see vektor-backend/services/logistics-svc/src/routing/
+// seedNetwork.ts's DEFAULT_GRID. (0,0)/(0.05,0.05) both resolve to the same
+// nearest grid node (the corner closest to that direction), so pgr_dijkstra
+// always returned an empty zero-distance path. These defaults land inside
+// the actual seeded grid so "Plan route" shows a real multi-waypoint path
+// out of the box.
+const DEFAULT_START: LatLon = { lat: 50.0, lon: 10.0 };
+const DEFAULT_END: LatLon = { lat: 50.03, lon: 10.03 };
 
 export function RoutePlanner() {
   const [start, setStart] = useState<LatLon>(DEFAULT_START);
@@ -54,7 +61,13 @@ export function RoutePlanner() {
         </p>
       )}
 
-      {result && (
+      {result && result.path.length === 0 && (
+        <p style={{ fontSize: 11, color: "#f5a623" }} aria-live="polite">
+          No route found — start/end are likely outside the seeded road network (roughly 50-50.03°N, 10-10.03°E in dev).
+        </p>
+      )}
+
+      {result && result.path.length > 0 && (
         <div style={{ fontSize: 11, display: "flex", flexDirection: "column", gap: 6 }}>
           <p>
             Distance: <strong>{(result.distance_m / 1000).toFixed(2)} km</strong> · Waypoints: {result.path.length} · Hazard

@@ -17,5 +17,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/alerts", label: "Alerts", requirement: "all" },
   { href: "/reports", label: "Reports", requirement: "analyst+" },
   { href: "/logistics", label: "Logistics", requirement: "logistics+" },
+  { href: "/field-camera", label: "Field Camera", requirement: "all" },
   { href: "/admin", label: "Admin", requirement: "superadmin" },
 ];

@@ -13,6 +13,11 @@ export const REPORTING_SVC_URL = process.env.NEXT_PUBLIC_REPORTING_SVC_URL ?? "h
 // rather than a separate env var — same reasoning no-strike-zone-layer.tsx's
 // own local FUSION_SVC_URL constant already uses.
 export const FUSION_SVC_URL = process.env.NEXT_PUBLIC_SOCKET_URL ?? "http://localhost:3007";
+// ingest-svc's field-ingest HTTP surface (src/http/app.ts) — a separate
+// trust boundary from the other services above: it's gated by a shared
+// device key header (X-Vektor-Device-Key), not the dev-auth-bridge JWT, so
+// it deliberately doesn't go through fetchWithAuth.
+export const FIELD_INGEST_URL = process.env.NEXT_PUBLIC_FIELD_INGEST_URL ?? "http://localhost:3016";
 
 export class AuthExpiredError extends Error {
   constructor() {
