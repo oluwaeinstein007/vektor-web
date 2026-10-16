@@ -2,6 +2,7 @@
   "name": "vektor-web",
   "private": true,
   "version": "0.1.0",
+  "license": "BUSL-1.1",
   "description": "VEKTOR frontend: the operator dashboard (apps/web) and its shared UI/config packages. See ../vektor-docs/VEKTOR-PRD.md §9.",
   "scripts": {
     "build": "turbo run build",

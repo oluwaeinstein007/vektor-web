@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { Map as MapLibreMap, GeoJSONSource } from "maplibre-gl";
 import type { NoStrikeZone } from "@vektor/shared";
 import { toZoneFeatureCollection, toZoneLabelPoints } from "@/lib/no-strike-zone-geojson";
+import { FUSION_SVC_URL, fetchWithAuth } from "@/lib/api-client";
 
 const SOURCE_ID = "no-strike-zones";
 const LABEL_SOURCE_ID = "no-strike-zone-labels";
@@ -11,11 +12,6 @@ const FILL_LAYER_ID = "no-strike-zones";
 const OUTLINE_LAYER_ID = "no-strike-zones-outline";
 const LABEL_LAYER_ID = "no-strike-zones-label";
 const ALL_LAYER_IDS = [FILL_LAYER_ID, OUTLINE_LAYER_ID, LABEL_LAYER_ID];
-
-// fusion-svc's REST API and Socket.io gateway share one Fastify HTTP server
-// (see fusion-svc/src/index.ts), so this reuses the same base URL apps/web
-// already points at for live entity updates rather than needing a second env var.
-const FUSION_SVC_URL = process.env.NEXT_PUBLIC_SOCKET_URL ?? "http://localhost:3007";
 
 /**
  * SVC-010's no-strike zones have no live push (no ingest adapter emits
@@ -34,8 +30,12 @@ export function NoStrikeZoneLayer({ map, visible }: { map: MapLibreMap; visible:
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${FUSION_SVC_URL}/api/v1/no-strike-zones`)
-      .then((res) => (res.ok ? (res.json() as Promise<NoStrikeZone[]>) : Promise.reject(new Error(String(res.status)))))
+    // GET /api/v1/no-strike-zones became RBAC-gated in NW-005 ("all" — any
+    // authenticated role), so this goes through fetchWithAuth for the Bearer
+    // header rather than a bare fetch. A missing/expired token surfaces as
+    // AuthExpiredError and the layer renders empty, same as any other
+    // fetch failure — the Settings screen is where a token gets re-minted.
+    fetchWithAuth<NoStrikeZone[]>(FUSION_SVC_URL, "/api/v1/no-strike-zones")
       .then((data) => {
         if (!cancelled) setZones(data);
       })

@@ -14,7 +14,7 @@ import { VitePWA } from "vite-plugin-pwa";
 // plain HTTP — proxying through Vite's own Node process (server-to-server,
 // not subject to browser mixed-content rules) means the phone never talks
 // to ingest-svc directly.
-const INGEST_SVC_URL = process.env.VITE_INGEST_SVC_URL ?? "http://localhost:3011";
+const INGEST_SVC_URL = process.env.VITE_INGEST_SVC_URL ?? "http://localhost:3016";
 
 // mkcert's -install step needs interactive sudo to add its CA to the OS
 // trust store — vite-plugin-mkcert re-runs that full command unconditionally

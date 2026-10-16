@@ -1,6 +1,7 @@
 {
   "name": "@vektor/web",
   "version": "0.1.0",
+  "license": "BUSL-1.1",
   "private": true,
   "description": "FE-001/FE-002/FE-003: operator dashboard. Next.js 15 App Router + MapLibre GL (§9.6, §10.1).",
   "type": "module",

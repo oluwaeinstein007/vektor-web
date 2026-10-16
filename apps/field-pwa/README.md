@@ -25,7 +25,7 @@ Needs `ingest-svc` running with its field endpoint enabled:
 # from vektor-backend/services/ingest-svc
 KAFKA_BROKERS=localhost:19092 \
 FIELD_DEVICE_SHARED_SECRET=<pick-a-secret> \
-  pnpm start   # field endpoint on :3011 by default (FIELD_INGEST_PORT)
+  pnpm start   # field endpoint on :3016 by default (FIELD_INGEST_PORT)
 ```
 
 Then run this app:

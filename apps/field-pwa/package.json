@@ -1,6 +1,7 @@
 {
   "name": "@vektor/field-pwa",
   "version": "0.1.0",
+  "license": "BUSL-1.1",
   "private": true,
   "description": "Field operator PWA: browser-based GPS + gyro/orientation capture from an operator's own phone, posted to ingest-svc's field HTTP endpoint. Not in the original roadmap phases — see VEKTOR-PRD.md's field-pwa placeholder in vektor-edge/vektor-infra, built out for real here.",
   "type": "module",
