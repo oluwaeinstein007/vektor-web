@@ -5,12 +5,15 @@ import maplibregl, { type Map as MapLibreMap } from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { EntityLayer } from "./entity-layer";
+import { EntityTrackLayer } from "./entity-track-layer";
+import { TimeSlider } from "./time-slider";
 import { NoStrikeZoneLayer } from "./no-strike-zone-layer";
 import { SensorCoverageLayer } from "./sensor-coverage-layer";
 import { SensorHealthPanel } from "./sensor-health-panel";
 import { CameraFeedPanel } from "./camera-feed-panel";
 import { HudPanel } from "./hud-panel";
 import { useEntityUpdates } from "@/hooks/useEntityUpdates";
+import { usePlaybackClock } from "@/hooks/usePlaybackClock";
 import { buildBaseMapStyle, OPENFREEMAP_PLANET_URL } from "@/lib/base-map-style";
 
 export interface MapLayer {
@@ -26,6 +29,9 @@ const INITIAL_LAYERS: MapLayer[] = [
   { id: "entities", label: "Entities", visible: true },
   { id: "sensors", label: "Sensor Coverage", visible: true },
   { id: "no-strike-zones", label: "No-Strike Zones", visible: false },
+  // NW-018: only renders while historical playback is active — the layer
+  // itself hides in live mode regardless of this toggle.
+  { id: "entity-track", label: "Track History", visible: true },
 ];
 
 /**
@@ -52,6 +58,10 @@ export function BaseMap() {
   // MapLibre has actually finished loading the style (addSource/addLayer
   // throw before that), and a ref change alone doesn't trigger a re-render.
   const [readyMap, setReadyMap] = useState<MapLibreMap | null>(null);
+  // NW-018: advances the playback clock and keeps the historical snapshot
+  // in step with it. Takes the map so snapshot queries can be scoped to the
+  // current viewport. No-op while mode === "live".
+  usePlaybackClock(readyMap);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -102,6 +112,7 @@ export function BaseMap() {
   const entityLayerVisible = layers.find((l) => l.id === "entities")?.visible ?? true;
   const noStrikeZonesVisible = layers.find((l) => l.id === "no-strike-zones")?.visible ?? false;
   const sensorCoverageVisible = layers.find((l) => l.id === "sensors")?.visible ?? true;
+  const trackHistoryVisible = layers.find((l) => l.id === "entity-track")?.visible ?? true;
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -109,9 +120,11 @@ export function BaseMap() {
       {readyMap && <EntityLayer map={readyMap} visible={entityLayerVisible} />}
       {readyMap && <NoStrikeZoneLayer map={readyMap} visible={noStrikeZonesVisible} />}
       {readyMap && <SensorCoverageLayer map={readyMap} visible={sensorCoverageVisible} />}
+      {readyMap && <EntityTrackLayer map={readyMap} visible={trackHistoryVisible} />}
       <LayerPanel layers={layers} onToggle={toggleLayer} />
       <SensorHealthPanel />
       <CameraFeedPanel />
+      <TimeSlider />
     </div>
   );
 }

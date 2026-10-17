@@ -3,6 +3,11 @@ import { getAuthToken } from "./auth-token";
 // Each RBAC-gated service hosts its own REST API on its own port — these
 // match each service's own src/index.ts PORT default.
 export const COA_SVC_URL = process.env.NEXT_PUBLIC_COA_SVC_URL ?? "http://localhost:3010";
+// SVC-005. Owns /api/v1/entities and, since NW-018, the entity-history read
+// surface (historical playback + pattern-of-life) — the projector lives
+// here rather than in fusion-svc because this service already owns the
+// entity read/query surface and the mgrs mapper.
+export const GEOSPATIAL_SVC_URL = process.env.NEXT_PUBLIC_GEOSPATIAL_SVC_URL ?? "http://localhost:3005";
 export const LOGISTICS_SVC_URL = process.env.NEXT_PUBLIC_LOGISTICS_SVC_URL ?? "http://localhost:3014";
 export const AUDIT_SVC_URL = process.env.NEXT_PUBLIC_AUDIT_SVC_URL ?? "http://localhost:3009";
 export const CV_INFERENCE_SVC_URL = process.env.NEXT_PUBLIC_CV_INFERENCE_SVC_URL ?? "http://localhost:3006";

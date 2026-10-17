@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import type { Map as MapLibreMap, GeoJSONSource } from "maplibre-gl";
-import { useEntityStore } from "@/stores/entity-store";
+import { useDisplayedEntities } from "@/hooks/useDisplayedEntities";
 import { toFeatureCollection } from "@/lib/entity-geojson";
 import { registerEntitySymbols } from "@/lib/entity-symbols";
 
@@ -26,6 +26,11 @@ const LAYER_IDS = [FRAME_LAYER_ID, GLYPH_LAYER_ID, LABEL_LAYER_ID];
  * "what is that dot" answerable at a glance instead of everything being an
  * identical colored circle.
  *
+ * Reads useDisplayedEntities rather than useEntityStore directly: in
+ * historical playback (NW-018) the same three layers render the snapshot at
+ * the scrubbed instant instead of live traffic, and this component does not
+ * need to know which it is being handed.
+ *
  * Deliberately does NOT call useEntityUpdates itself — this component only
  * mounts once the map's "load" event has fired (see base-map.tsx), which
  * can take much longer than the socket connecting. entity:new/updated/lost
@@ -35,7 +40,7 @@ const LAYER_IDS = [FRAME_LAYER_ID, GLYPH_LAYER_ID, LABEL_LAYER_ID];
  * unconditionally.
  */
 export function EntityLayer({ map, visible }: { map: MapLibreMap; visible: boolean }) {
-  const entities = useEntityStore((s) => s.entities);
+  const entities = useDisplayedEntities();
 
   useEffect(() => {
     if (map.getSource(SOURCE_ID)) return;
